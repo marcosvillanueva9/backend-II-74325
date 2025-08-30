@@ -1,21 +1,26 @@
 import { Router } from 'express'
 
+import Usuarios from '../models/usuarios.model.js'
+
 const router = Router()
 
-const users = []
-
-router.post('/register', (req, res) => {
+router.post('/register', async (req, res) => {
     const { first_name, last_name, email, age, password } = req.body
 
     if (!first_name || !last_name || !email || !age || !password) {
         return res.status(400).send('todos los campos son requeridos')
     }
 
-    users.push({
-        first_name,
-        last_name,
+    const user = await Usuarios.findOne({email})
+    if (user) {
+        return res.status(400).send('el email ya existe', user)
+    }
+
+    await Usuarios.create({
+        nombre: first_name,
+        apellido: last_name,
         email,
-        age,
+        edad: age,
         password
     })
 
@@ -29,15 +34,19 @@ router.post('/register', (req, res) => {
     res.redirect('/profile')
 })
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, password } = req.body
 
     if (!email || !password) {
         return res.status(400).send('todos los campos son requeridos')
     }
 
-    const user = users.find( u => u.email == email && u.password == password)
+    const user = await Usuarios.findOne({email})
     if (!user) {
+        return res.status(401).send('credenciales invalidas')
+    }
+
+    if (user.password !== password) {
         return res.status(401).send('credenciales invalidas')
     }
 

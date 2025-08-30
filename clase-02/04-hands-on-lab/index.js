@@ -1,10 +1,11 @@
 import express from 'express'
 import session from 'express-session'
+import mongoose from 'mongoose'
 import MongoStore from 'connect-mongo'
 import handlebars from 'express-handlebars'
 
-import sessionRouter from './routes/sessions.router.js'
-import viewsRouter from './routes/views.router.js'
+import sessionRouter from './src/routes/sessions.router.js'
+import viewsRouter from './src/routes/views.router.js'
 
 const app = express()
 const PORT = 8080
@@ -12,12 +13,14 @@ const PORT = 8080
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+mongoose.connect('mongodb://localhost:27017/loginDB', {})
+
 // SESSION
 app.use(session({
     store: MongoStore.create({
         mongoUrl: 'mongodb://localhost:27017/loginDB',
         collectionName: 'sessions',
-        ttl: 5
+        ttl: 3600
     }),
     secret: 'codersecret',
     resave: true,
