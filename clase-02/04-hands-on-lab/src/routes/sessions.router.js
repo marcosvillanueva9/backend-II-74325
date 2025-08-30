@@ -51,10 +51,10 @@ router.post('/login', async (req, res) => {
     }
 
     req.session.user = {
-        first_name: user.first_name,
-        last_name: user.last_name,
+        first_name: user.nombre,
+        last_name: user.apellido,
         email: user.email,
-        age: user.age
+        age: user.edad
     }
 
     res.redirect('/profile')
