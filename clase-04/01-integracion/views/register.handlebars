@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+  <div class="container">
+    <h2>Registrarse</h2>
+    {{#if error}}
+      <div class="alert">¡Registro fallido! Intenta nuevamente</div>
+    {{/if}}
+    <form method="POST" action="/users/register">
+      <input name="first_name" placeholder="Nombre" type="text" required />
+      <input name="last_name" placeholder="Apellido" type="text" required />
+      <input name="email" placeholder="Email" type="email" required />
+      <input name="password" placeholder="Contraseña" type="password" required />
+      <button type="submit">Registrarse</button>
+    </form>
+  </div>
+</body>
+</html>
