@@ -1,31 +1,41 @@
-import User from "../dao/classes/users.dao.js";
+import UserDAO from "../dao/classes/users.dao.js"
 
-const userService = new User();
+const userDb = new UserDAO()
 
-class UsersController {
-  
-    static async getUsers(req, res) {
-        
-        const users = await userService.getUsers();
-
-        if (!users) res.status(500).send({status: 'error', message: 'Failed to retrieve users'});
-        else if (users.length === 0) res.status(404).send({status: 'error', message: 'No users found'});
-        else res.send({status: 'success', result: users});
+export default class UsersController {
+    
+    static async getAllUsers(req, res) {
+        try {
+            const users = await userDb.getAll()
+            if (!users) res.status(500).json({status: 'error', message: 'Failed to retrieve'})
+            else if (users.length === 0) res.status(404).json({status: 'error', message: 'No users found'})
+            else res.json({status: 'success', result: users})
+        } catch (error) {
+            res.status(500).json({status: 'error', message: 'Unexpected error'})
+        }
     }
 
-    static async getUserById(req, res) {
-        const { id } = req.params;
-        const user = await userService.getUserById(id);
-        if (!user) res.status(404).send({status: 'error', message: 'User not found'});
-        else res.send({status: 'success', result: user});
+    static async getUser(req, res) {
+        try {
+            const { id } = req.params
+            // validaciones del id que sea correcto
+            const user = await userDb.getById(id)
+            if (!user) res.status(404).json({status: 'error', message: 'User Not found'})
+            else res.json({status: 'success', result: user})
+        } catch (error) {
+            res.status(500).json({status: 'error', message: 'Unexpected error'})
+        }
     }
 
     static async createUser(req, res) {
-        const userData = req.body;
-        const newUser = await userService.createUser(userData);
-        if (!newUser) res.status(500).send({status: 'error', message: 'Failed to create user'});
-        else res.send({status: 'success', result: newUser});
+        try {
+            const userData = req.body
+            // validaciones del modelo que sea correcto
+            const newUser = await userDb.create(userData)
+            if (!newUser) res.status(500).json({status: 'error', message: 'Failed to create'})
+            else res.json({status: 'success', result: newUser})
+        } catch (error) {
+            res.status(500).json({status: 'error', message: 'Unexpected error'})
+        }
     }
 }
-
-export default UsersController;

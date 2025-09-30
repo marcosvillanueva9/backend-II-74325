@@ -1,44 +1,33 @@
-import userModel from "../models/users.model.js";
+import usersModel from '../models/users.model.js'
 
 export default class User {
-    
-    getUsers = async () => {
+    getAll = async () => {
         try {
-            const users = await userModel.find();
-            return users;
+            const users = await usersModel.find();
+            return users
         } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 
-    getUserById = async (id) => {
+    getById = async (id) => {
         try {
-            const user = await userModel.findOne({ _id: id });
-            return user;
+            const user = await usersModel.findById(id)
+            return user
         } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 
-    createUser = async (userData) => {
+    create = async (userData) => {
         try {
-            const newUser = await userModel.create(userData);
-            return newUser;
+            const newUser = await usersModel.create(userData)
+            return newUser
         } catch (error) {
-            console.log(error);
-            return null;
-        }
-    }
-
-    updateUser = async (id, userData) => {
-        try {
-            const updatedUser = await userModel.updateOne({ _id: id }, userData);
-            return updatedUser;
-        } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 }

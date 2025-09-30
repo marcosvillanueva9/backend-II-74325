@@ -1,46 +1,71 @@
-import Business from "../dao/classes/business.dao.js";
+import Business from "../dao/classes/business.dao.js"
+// import product
 
-const businessService = new Business();
+const dbService = new Business()
 
-class BusinessController {
-
-    static async getBusinesses(req, res) {
-        const businesses = await businessService.getBusinesses();
-        if (!businesses) res.status(500).send({status: 'error', message: 'Failed to retrieve businesses'});
-        else if (businesses.length === 0) res.status(404).send({status: 'error', message: 'No businesses found'});
-        else res.send({status: 'success', result: businesses});
+export default class BusinessController {
+    
+    static async getAllBusiness(req, res) {
+        try {
+            const businesses = await dbService.getAll()
+            if (!businesses) res.status(500).json({status: 'error', message: 'Failed to retrieve'})
+            else if (businesses.length === 0) res.status(404).json({status: 'error', message: 'No businesses found'})
+            else res.json({status: 'success', result: businesses})
+        } catch (error) {
+            res.status(500).json({status: 'error', message: 'Unexpected error'})
+        }
     }
 
-    static async getBusinessById(req, res) {
-        const { id } = req.params;
-        const business = await businessService.getBusinessById(id);
-        if (!business) res.status(404).send({status: 'error', message: 'Business not found'});
-        else res.send({status: 'success', result: business});
+    static async getBusiness(req, res) {
+        try {
+            const { id } = req.params
+            // validaciones del id que sea correcto
+            const business = await dbService.getById(id)
+            if (!business) res.status(404).json({status: 'error', message: 'Business Not found'})
+            else res.json({status: 'success', result: business})
+        } catch (error) {
+            res.status(500).json({status: 'error', message: 'Unexpected error'})
+        }
     }
 
     static async createBusiness(req, res) {
-        const businessData = req.body;
-        const newBusiness = await businessService.createBusiness(businessData);
-        if (!newBusiness) res.status(500).send({status: 'error', message: 'Failed to create business'});
-        else res.send({status: 'success', result: newBusiness});
+        try {
+            const businessData = req.body
+            // validaciones del modelo que sea correcto
+            const newBusiness = await dbService.create(businessData)
+            if (!newBusiness) res.status(500).json({status: 'error', message: 'Failed to create'})
+            else res.json({status: 'success', result: newBusiness})
+        } catch (error) {
+            res.status(500).json({status: 'error', message: 'Unexpected error'})
+        }
     }
 
     static async addProduct(req, res) {
-        const { id } = req.params;
-        const productData = req.body;
-        let business = await businessService.getBusinessById(id);
-        if (!business) {
-            res.status(404).send({status: 'error', message: 'Business not found'});
-            return;
+        try {
+            const { id } = req.params
+            const productData = req.body
+            // validaciones del modelo y id que sea correcto
+            let business = await dbService.getById(id)
+            if (!business) {
+                res.status(404).json({status: 'error', message: 'Business Not found'})
+                return
+            }
+
+
+            // primero crear producto
+
+
+            business.products.push(productData)
+
+            const updatedBusiness = await dbService.update(id, business)
+            if (!updatedBusiness) {
+                res.status(500).json({status: 'error', message: 'Failed adding a product'})
+                return
+            }
+
+            res.json({status: 'success', result: updatedBusiness})
+        } catch (error) {
+            res.status(500).json({status: 'error', message: 'Unexpected error'})
         }
-
-        business.products.push(productData);
-
-        
-        const updatedBusiness = await businessService.updateBusiness(id, business);
-        if (!updatedBusiness) res.status(500).send({status: 'error', message: 'Failed to add product to business'});
-        else res.send({status: 'success', result: updatedBusiness});
     }
 }
-
-export default BusinessController;

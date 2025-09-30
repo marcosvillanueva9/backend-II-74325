@@ -1,20 +1,19 @@
 import mongoose from "mongoose";
 
-class MongoConn {
+export default class MongoConn {
     static instance
 
     constructor() {
         this.connection = null
     }
 
-    async connect (url) {
+    async connect(url) {
         if (!MongoConn.instance) {
             this.connection = await mongoose.connect(url, {})
-            console.log('MongoDB connected!')
             MongoConn.instance = this
+            console.log('MongoDB connected!')
         }
+
         return MongoConn.instance
     }
 }
-
-export default MongoConn

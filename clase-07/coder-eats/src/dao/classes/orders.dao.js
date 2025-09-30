@@ -1,43 +1,43 @@
-import orderModel from "../models/orders.model.js";
+import ordersModel from '../models/orders.model.js'
 
 export default class Order {
-    getOrders = async () => {
+    getAll = async () => {
         try {
-            const orders = await orderModel.find().populate('business').populate('user');
-            return orders;
+            const orders = await ordersModel.find().populate('business').populate('user');
+            return orders
         } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 
-    getOrderById = async (id) => {
+    getById = async (id) => {
         try {
-            const order = await orderModel.findOne({ _id: id }).populate('business').populate('user');
-            return order;
+            const order = await ordersModel.findById(id).populate('business').populate('user')
+            return order
         } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 
-    createOrder = async (orderData) => {
+    create = async (orderData) => {
         try {
-            const newOrder = await orderModel.create(orderData);
-            return newOrder;
+            const newOrder = await ordersModel.create(orderData)
+            return newOrder
         } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 
-    resolveOrder = async (id, orderData) => {
+    update = async (id, orderData) => {
         try {
-            const updatedOrder = await orderModel.updateOne({ _id: id }, orderData);
-            return updatedOrder;
+            const updatedOrder = await ordersModel.updateOne({_id: id}, orderData)
+            return updatedOrder
         } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 }

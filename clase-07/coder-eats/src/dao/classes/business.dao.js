@@ -1,43 +1,43 @@
-import businessModel from "../models/business.model.js";
+import businessModel from '../models/business.model.js'
 
 export default class Business {
-    getBusinesses = async () => {
+    getAll = async () => {
         try {
             const businesses = await businessModel.find();
-            return businesses;
+            return businesses
         } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 
-    getBusinessById = async (id) => {
+    getById = async (id) => {
         try {
-            const business = await businessModel.findOne({ _id: id });
-            return business;
+            const business = await businessModel.findById(id)
+            return business
         } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 
-    createBusiness = async (businessData) => {
+    create = async (businessData) => {
         try {
-            const newBusiness = await businessModel.create(businessData);
-            return newBusiness;
+            const newBusiness = await businessModel.create(businessData)
+            return newBusiness
         } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 
-    updateBusiness = async (id, businessData) => {
+    update = async (id, businessData) => {
         try {
-            const updatedBusiness = await businessModel.updateOne({ _id: id }, businessData);
-            return updatedBusiness;
+            const updatedBusiness = await businessModel.updateOne({_id: id}, businessData)
+            return updatedBusiness
         } catch (error) {
-            console.log(error);
-            return null;
+            console.log(error)
+            return null
         }
     }
 }

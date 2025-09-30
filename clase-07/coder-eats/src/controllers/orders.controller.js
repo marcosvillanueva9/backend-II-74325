@@ -1,65 +1,86 @@
-import Order from "../dao/classes/orders.dao.js";
-import User from "../dao/classes/users.dao.js";
-import Business from "../dao/classes/business.dao.js";
+import OrderDAO from "../dao/classes/orders.dao.js"
+import UserDAO from "../dao/classes/users.dao.js"
+import BusinessDAO from "../dao/classes/business.dao.js"
 
-const orderService = new Order();
-const userService = new User();
-const businessService = new Business();
+const orderService = new OrderDAO()
+const userService = new UserDAO()
+const businessService = new BusinessDAO()
 
-class OrdersController {
-
-    static async getOrders(req, res) {
-        const orders = await orderService.getOrders();
-        if (!orders) res.status(500).send({status: 'error', message: 'Failed to retrieve orders'});
-        else if (orders.length === 0) res.status(404).send({status: 'error', message: 'No orders found'});
-        else res.send({status: 'success', result: orders});
+export default class OrdersController {
+    
+    static async getAllOrders(req, res) {
+        try {
+            const orders = await orderService.getAll()
+            if (!orders) res.status(500).json({status: 'error', message: 'Failed to retrieve'})
+            else if (orders.length === 0) res.status(404).json({status: 'error', message: 'No orders found'})
+            else res.json({status: 'success', result: orders})
+        } catch (error) {
+            res.status(500).json({status: 'error', message: 'Unexpected error'})
+        }
     }
 
-    static async getOrderById(req, res) {
-        const { id } = req.params;
-        const order = await orderService.getOrderById(id);
-        if (!order) res.status(404).send({status: 'error', message: 'Order not found'});
-        else res.send({status: 'success', result: order});
+    static async getOrder(req, res) {
+        try {
+            const { id } = req.params
+            // validaciones del id que sea correcto
+            const order = await orderService.getById(id)
+            if (!order) res.status(404).json({status: 'error', message: 'Order Not found'})
+            else res.json({status: 'success', result: order})
+        } catch (error) {
+            res.status(500).json({status: 'error', message: 'Unexpected error'})
+        }
     }
 
     static async createOrder(req, res) {
-        const {user, business, products} = req.body;
+        try {
+            const { userId, businessId, products } = req.body
+            // validaciones del modelo que sea correcto
 
-        const resultUser = await userService.getUserById(user);
-        if (!resultUser) {
-            res.status(404).send({status: 'error', message: 'User not found'});
-            return;
+            const user = await userService.getById(userId)
+            if (!user) {
+                res.status(404).json({status: 'error', message: 'User Not found'})
+                return
+            }
+
+            const business = await businessService.getById(businessId)
+            if (!business) {
+                res.status(404).json({status: 'error', message: 'Business Not found'})
+                return
+            }
+
+            let actualOrder = business.products.filter( product => products.includes(product._id))
+            let sum = actualOrder.reduce((acc, product) => acc + product.price, 0)
+            let orderNumber = Date.now() + Math.floor(Math.random() * 1000)
+
+            let order = {
+                number: orderNumber,
+                business: businessId,
+                user: userId,
+                status: 'pending',
+                products: actualOrder.map(product => product.id),
+                totalPrice: sum
+            }
+
+            let orderResult = await orderService.create(order)
+            // actualizar el user
+
+            res.json({status: 'success', result: orderResult})
+
+        } catch (error) {
+            res.status(500).json({status: 'error', message: 'Unexpected error'})
         }
-        const resultBusiness = await businessService.getBusinessById(business);
-        if (!resultBusiness) {
-            res.status(404).send({status: 'error', message: 'Business not found'});
-            return;
-        }
-
-        let actualOrders = resultBusiness.products.filter( product => products.includes(product.id))
-        let sum = actualOrders.reduce((acc, product) => acc + product.price, 0);
-        let orderNumber = Date.now() + Math.floor(Math.random() * 1000);
-
-        let order = {
-            number: orderNumber,
-            business,
-            user,
-            status: 'pending',
-            products: actualOrders.map(product => product.id),
-            totalPrice: sum
-        };
-        let orderResult = await orderService.createOrder(order);
-        await userService.updateUser(user, { $push: { orders: orderResult._id } });
-        res.send({status: 'success', result: orderResult});
     }
 
     static async resolveOrder(req, res) {
-        const { id } = req.params;
-        const productData = req.body;
-        const updatedOrder = await orderService.updateOrder(id, { status: 'resolved', productData });
-        if (!updatedOrder) res.status(500).send({status: 'error', message: 'Failed to resolve order'});
-        else res.send({status: 'success', result: updatedOrder});
+        const { id } = req.params
+        const orderData = req.body
+
+        const updatedOrder = await orderService.update(id, orderData)
+        if (!updatedOrder) {
+                res.status(500).json({status: 'error', message: 'Failed to resolve'})
+                return
+        }
+
+        res.json({status: 'success', result: updatedOrder})
     }
 }
-
-export default OrdersController;
